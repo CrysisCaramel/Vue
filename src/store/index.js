@@ -13,7 +13,8 @@ export default new Vuex.Store({
     url: "",
     searchItems: [],
     myListItems: [],
-    changeView: false
+    changeView: false,
+    error: null
   },
   mutations: {
     getType (state, payload) {
@@ -45,6 +46,7 @@ export default new Vuex.Store({
       state.searchItems = newResponse;
     },
     getMyListItems (state, payload) {
+      state.error = null;
       const newMyList = state.myListItems.concat();
       const item = state.searchItems.find(value => value.id === payload.id);
       if (item) {
@@ -58,6 +60,9 @@ export default new Vuex.Store({
     },
     changeView (state, payload) {
       state.changeView = payload;
+    },
+    getError (state, payload) {
+      state.error = payload;
     }
   },
   actions: {
@@ -65,7 +70,13 @@ export default new Vuex.Store({
       commit("generateUrl");
       fetch(state.url)
         .then(response => response.json())
-        .then(({ items }) => commit("getSearchItems", items));
+        .then(({ items, message }) => {
+          if (items) {
+            commit("getSearchItems", items);
+          } else {
+            commit("getError", message);
+          }
+        });
     }
   }
 });
